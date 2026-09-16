@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Course pilots / scratch (do not distribute)
+_pilot/
+_smoke/
+
+# Student-produced artifacts (students should override this as needed)
+# their trained weights, logs, checkpoints — but keep .model baselines below
+*.pt
+*.ckpt
+*.log
+training_log.txt
+
+# Explicitly keep the pretrained baseline weights that the grader loads
+!best_policy_*.model
+!best_policy_*.model2
