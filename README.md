@@ -17,6 +17,51 @@
 
 ---
 
+## 환경, State, Action, Reward
+
+이 저장소는 gym 스타일 `env.step()`을 제공하지 않습니다. 학습에 쓸 재료는 아래와 같이
+`game.Board`에서 직접 뽑아 씁니다.
+
+**State (기본 표현)**
+`board.current_state()` → `(4, 8, 8)` numpy float 텐서. **현재 플레이어 시점**입니다.
+
+- 채널 0 — 내 돌 위치 (1 = 있음, 0 = 없음)
+- 채널 1 — 상대 돌 위치
+- 채널 2 — 마지막 수 위치 (한 셀만 1)
+- 채널 3 — 내가 흑(선공)이면 전체 1, 백이면 전체 0
+
+State 표현은 자유롭게 재설계 가능. 다만 **제출은 `policy_value_net_pytorch.py`의 `Net`
+구조에 맞는 가중치여야 로드되므로** `Conv2d(in_channels=4, ...)`와 호환되게 학습해
+주세요. 커스텀 구조로 학습했다면 마지막에 표준 net으로 이식하면 됩니다.
+
+**Action 공간**
+이산 64개. 액션 인덱스 `a`는 `row = a // 8`, `col = a % 8`.
+`board.availables`가 매 상태에서 합법 수 인덱스 리스트를 반환.
+
+> DQN / PPO를 쓸 경우 **illegal-move 마스킹 필수** — 로짓 또는 Q값에서 `board.availables`
+> 밖의 인덱스를 `-inf`로 잘라내지 않으면 정책이 오답 액션에 쏠려 학습이 안정적이지
+> 않습니다.
+
+**Reward**
+`board.game_end() → (end, winner)`만 존재. 표준 관례:
+
+- 승자 관점: **+1**
+- 패자 관점: **-1**
+- 무승부: **0**
+- 중간 보상: 없음 (sparse terminal reward)
+
+실제 라벨링 예시는 `game.py:210~215`의 `winners_z` 계산 참고.
+
+**대칭성 (data augmentation)**
+8×8 오목판은 회전 4방향 + 좌우 반전으로 상태·정책 라벨 모두 총 **8배 증강** 가능.
+`train.py:63`의 `get_equi_data`가 참고 예시.
+
+**Self-play 데이터**
+AlphaZero 스타일이면 `Game.start_self_play(mcts_player)` 한 방으로 한 판을 자동 진행하며
+`(state, mcts_probs, winner_z)` 튜플 시퀀스를 반환합니다 (`game.py:190`).
+
+---
+
 ## 제출물
 
 **본인이 학습한 가중치 파일 하나**만 제출 (제출 방법은 별도 공지). 총 크기 100 MB 이하.
